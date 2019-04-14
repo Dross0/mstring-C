@@ -21,6 +21,12 @@ typedef struct string{
     size_t real_size; 
 }string_t;
 
+typedef struct string_array{
+    string_t ** data;
+    size_t size;
+    size_t max_size;
+}string_array_t;
+
 
 static string_t * string_create(size_t length);
 void string_free(string_t * string);
@@ -39,6 +45,8 @@ int string_find(const string_t * string, const uchar symbol, int start, int end)
 int string_rfind(const string_t * string, const uchar symbol, int start, int end);
 int string_swartswith(const string_t * string, const uchar * pattern);
 int string_endswith(const string_t * string, const uchar * pattern);
+void string_array_free(string_array_t * string_array);
+string_array_t * string_split(const string_t * string, const uchar symbol);
 void string_empty(string_t * string);
 void string_set(string_t * string, uchar symbol, size_t size);
 int is_upper(const uchar symbol);

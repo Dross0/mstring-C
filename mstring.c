@@ -101,6 +101,61 @@ void string_strip(string_t * string){
     string_rstrip(string);
 }
 
+void string_array_free(string_array_t * string_array){
+    size_t i = 0;
+    for (i = 0; i < string_array->size; ++i){
+        string_free(string_array->data[i]);
+    }
+    free(string_array);
+}
+
+string_array_t * string_split(const string_t * string, const uchar symbol){
+    string_array_t * string_arr = (string_array_t *)malloc(sizeof(string_array_t));
+    string_arr->max_size = 20;
+    string_arr->size = 0;
+    string_arr->data = (string_t *)malloc(sizeof(string_t *) * string_arr->max_size); 
+    if (string_arr->data == NULL){
+        return NULL;
+    }
+    size_t str_size = 20;
+    string_t * str = 0;
+    size_t i = 0;
+    int c = 0;    
+    for (i = 0; i < string->real_size; ++i){
+        if (string->data[i] == symbol){
+            continue;
+        }
+        str = string_create(str_size);
+        while (i < string->real_size && string->data[i] != symbol){
+            string_append(str, string->data[i]);
+            c++;
+            if (c == str->length){
+                str_size *= 2;
+                str->data = (uchar *)realloc(str->data, str_size * sizeof(uchar));
+                str->length = str_size;
+                if (str->data == NULL){
+                    string_free(str);
+                    string_array_free(string_arr);
+                    return NULL;
+                }
+            }
+            i++;
+        }
+        c = 0;
+        str_size = 20;
+        string_arr->data[string_arr->size++] = str;
+        if (string_arr->size == string_arr->max_size){
+            string_arr->max_size *= 2;
+            string_arr->data = (string_t *)realloc(string_arr->data, string_arr->max_size * sizeof(string_t *));
+            if (string_arr->data == NULL){
+                string_array_free(string_arr);
+                return NULL;
+            }
+        }
+    }
+    return string_arr;
+}
+
 void string_copy(string_t * dest, const string_t * src){
     size_t i = 0;
     while (i < dest->length){

@@ -109,6 +109,43 @@ void string_array_free(string_array_t * string_array){
     free(string_array);
 }
 
+static int comp(const string_t * str, const uchar * pat, size_t str_pos, const size_t pat_size){
+    size_t i = 0;
+    for (i = 0; i < pat_size; ++i){
+        if (str_pos == str->real_size || str->data[str_pos++] != pat[i]){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+string_t * string_replace(const string_t * string, const uchar * old, const uchar * new){
+    size_t old_len = str_len(old);
+    size_t new_len = str_len(new);
+    string_t * new_string = 0;
+    if (old_len < new_len){
+        new_string = string_create(string->real_size + (string->real_size * (new_len - old_len)));
+    }
+    else{
+        new_string = string_create(string->real_size);
+    }
+    int is_equal = 0;
+    size_t i = 0;
+    size_t j = 0;
+    for (i = 0; i < string->real_size; ++i){
+        if (string->data[i] == old[0] && (is_equal = comp(string, old, i, old_len))){
+            for (j = 0; j < new_len; ++j){
+                string_append(new_string, new[j]);
+            }
+            i += old_len - 1;
+        }
+        else{
+            string_append(new_string, string->data[i]);
+        }
+    }
+    return new_string;
+}
+
 string_array_t * string_split(const string_t * string, const uchar symbol){
     string_array_t * string_arr = (string_array_t *)malloc(sizeof(string_array_t));
     string_arr->max_size = 20;

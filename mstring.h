@@ -47,6 +47,7 @@ int string_swartswith(const string_t * string, const uchar * pattern);
 int string_endswith(const string_t * string, const uchar * pattern);
 void string_array_free(string_array_t * string_array);
 string_array_t * string_split(const string_t * string, const uchar symbol);
+string_t * string_replace(const string_t * string, const uchar * old, const uchar * new);
 void string_empty(string_t * string);
 void string_set(string_t * string, uchar symbol, size_t size);
 int is_upper(const uchar symbol);

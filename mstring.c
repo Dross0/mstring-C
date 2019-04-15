@@ -546,10 +546,3 @@ void swap(void * a, void * b, size_t size){
         *((char *) b + i) = temp;
     }
 }
-
-int main(){
-    string_t * hel = string_dup("fellojjir");
-    printf("%d\n", string_islower(hel));
-
-    return 0;
-}

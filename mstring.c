@@ -37,6 +37,11 @@ void print_string(string_t * str, FILE * file){
     fwrite(str->data, sizeof(uchar), str->real_size, file);
 }
 
+void println_string(string_t * str, FILE * file){
+    fwrite(str->data, sizeof(uchar), str->real_size, file);
+    fprintf(file, "\n");
+}
+
 string_t * string_concat(const string_t * left, const string_t * right){
     string_t * string = string_create(left->length + right->length);
     if (string == NULL){
@@ -59,6 +64,9 @@ string_t * string_slice(const string_t * string, int start, int end){
         error("string_slice", "Start cant be greater than end", ValueError);
     }
     string_t *slice = string_create(end - start);
+    if (slice == NULL){
+        return NULL;
+    }
     size_t i = 0;
     for (i = start; i < end; ++i){
         string_append(slice, string->data[i]);
@@ -101,6 +109,21 @@ void string_strip(string_t * string){
     string_rstrip(string);
 }
 
+string_t * string_center(const string_t * string, const uchar symbol){
+    string_t * res = string_create(string->real_size + 2);
+    if (res == NULL){
+        return NULL;
+    }
+    res->real_size = res->length;
+    res->data[res->real_size] = '\0';
+    res->data[0] = res->data[res->real_size - 1] = symbol;
+    size_t i = 0;
+    for (i = 1; i < (res->real_size - 1); ++i){
+        res->data[i] = string->data[i-1];
+    }
+    return res;
+}
+
 void string_array_free(string_array_t * string_array){
     size_t i = 0;
     for (i = 0; i < string_array->size; ++i){
@@ -129,6 +152,9 @@ string_t * string_replace(const string_t * string, const uchar * old, const ucha
     else{
         new_string = string_create(string->real_size);
     }
+    if (new_string == NULL){
+        return NULL;
+    }
     int is_equal = 0;
     size_t i = 0;
     size_t j = 0;
@@ -146,8 +172,37 @@ string_t * string_replace(const string_t * string, const uchar * old, const ucha
     return new_string;
 }
 
+string_t * string_join(const string_array_t * str_arr, const uchar * pat){
+    size_t len_sum = 0;
+    size_t i = 0;
+    for (i = 0; i < str_arr->size; ++i){
+        len_sum += str_arr->data[i]->real_size;
+    }
+    size_t pat_len = str_len(pat);
+    string_t * string = string_create(len_sum + (pat_len * (str_arr->size - 1)));
+    if (string == NULL){
+        return NULL;
+    }
+    size_t j = 0;
+    for (i = 0; i < str_arr->size; ++i){
+        for (j = 0; j < str_arr->data[i]->real_size; ++j){
+            string_append(string, str_arr->data[i]->data[j]);
+        }
+        if (i != (str_arr->size - 1)){
+            for (j = 0; j < pat_len; ++j){
+                string_append(string, pat[j]);
+            }
+        }
+    }
+    return string;
+}
+
+
 string_array_t * string_split(const string_t * string, const uchar symbol){
     string_array_t * string_arr = (string_array_t *)malloc(sizeof(string_array_t));
+    if (string_arr == NULL){
+        return NULL;
+    }
     string_arr->max_size = 20;
     string_arr->size = 0;
     string_arr->data = (string_t *)malloc(sizeof(string_t *) * string_arr->max_size); 
@@ -425,27 +480,27 @@ static int template(const string_t * string, int (check)(const uchar symbol)){
 }
 
 int string_islower(const string_t * string){
-    template(string, is_lower);
+    return template(string, is_lower);
 }
 
 int string_isupper(const string_t * string){
-    template(string, is_upper);
+    return template(string, is_upper);
 }
 
 int string_isdigit(const string_t * string){
-    template(string, is_digit);
+    return template(string, is_digit);
 }
 
 int string_isalpha(const string_t * string){
-    template(string, is_alpha);
+    return template(string, is_alpha);
 }
 
 int string_isalnum(const string_t * string){
-   template(string, is_alnum);
+   return template(string, is_alnum);
 }
 
 int string_isspace(const string_t * string){
-    template(string, is_space);
+    return template(string, is_space);
 }
 
 int string_compare(const string_t * str1, const string_t * str2){
@@ -492,3 +547,9 @@ void swap(void * a, void * b, size_t size){
     }
 }
 
+int main(){
+    string_t * hel = string_dup("fellojjir");
+    printf("%d\n", string_islower(hel));
+
+    return 0;
+}
